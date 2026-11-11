@@ -1,0 +1,9 @@
+//1. テキストの表示
+//色やフォント、文字サイズなどの指定がない場合
+Text(Hello, world!);
+
+//色を#000000、フォントをヒラギノ角ゴシックProN、文字サイズを30pxにする場合
+Text(Hello, world!){
+  color: #000000;
+  font: "Hiragino Kaku Gothic ProN";
+  size: 30px;

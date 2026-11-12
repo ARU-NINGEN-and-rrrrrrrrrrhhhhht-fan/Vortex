@@ -1,0 +1,11 @@
+BackgroundColor(#000000);
+
+Text(Vortex Official Site){
+  Color: #000000;
+  Font: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Sans Serif", "Yu Gothic";
+  Size: 30px
+  Bold: 1
+}
+^main
+
+play(main);

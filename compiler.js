@@ -155,4 +155,4 @@ console.log("--- 生成されたJavaScript ---");
 console.log(generatedJS);
 
 // ブラウザ上でそのまま実行したい場合は以下のコメントを外す
-// new Function(generatedJS)();
+new Function(generatedJS)();

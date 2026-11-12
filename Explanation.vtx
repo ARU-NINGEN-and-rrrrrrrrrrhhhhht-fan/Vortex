@@ -7,3 +7,6 @@ Text(Hello, world!){
   color: #000000;
   font: "Hiragino Kaku Gothic ProN";
   size: 30px;
+
+//シャットダウンするコード
+shutdown;

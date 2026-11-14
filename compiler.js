@@ -1,4 +1,3 @@
-/*** Vortex コンパイラ (compiler.js) 指定された Vortex コードを JavaScript にトランスパイルして実行します。***/
 function compileVortexToJS(vortexCode) {
     // 1. コメント（// から行末まで）をすべて削除
     let code = vortexCode.replace(/\/\/.*$/gm, '');

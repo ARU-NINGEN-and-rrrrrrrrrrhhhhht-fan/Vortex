@@ -1,3 +1,6 @@
+/**
+ * VortexコードをJavaScriptコードにトランスパイル（変換）する関数
+ */
 function compileVortexToJS(vortexCode) {
     // 1. コメント（// から行末まで）をすべて削除
     let code = vortexCode.replace(/\/\/.*$/gm, '');
@@ -6,6 +9,7 @@ function compileVortexToJS(vortexCode) {
     let elementCount = 0; // 生成するHTML要素の変数名を被らないようにするための連番
 
     // 2. ブロック定義（.ブロック名. 〜 ^ブロック名）を抽出してJSの関数に変換
+    // [\s\S]*? は改行を含むすべての文字に最短マッチさせる正規表現
     code = code.replace(/\.([a-zA-Z0-9_]+)\.([\s\S]*?)\^\1/g, (match, funcName, body) => {
         const compiledBody = parseStatements(body);
         return `function ${funcName}() {\n${compiledBody}}\n`;
@@ -61,7 +65,7 @@ function compileVortexToJS(vortexCode) {
                 const styleContent = blockText.slice(cursor + 1, closeBrace);
                 cursor = closeBrace + 1;
 
-                // 閉じ括弧の後ろの空白とセミコロンを処理
+                // 閉じ括弧の後ろにセミコロンがあれば消費する
                 while (cursor < blockText.length && /\s/.test(blockText[cursor])) cursor++;
                 if (blockText[cursor] === ';') cursor++;
 
@@ -78,6 +82,7 @@ function compileVortexToJS(vortexCode) {
                 } else if (cmdName === 'play') {
                     result += `${arg}();\n`;
                 } else if (cmdName === 'Text') {
+                    // スタイル指定なしの Text(Hello, world!); にも対応
                     result += generateTextJS(arg, '');
                 }
             } else {
@@ -91,6 +96,7 @@ function compileVortexToJS(vortexCode) {
     function generateTextJS(text, styleBlock) {
         elementCount++;
         const varName = `vtx_el_${elementCount}`;
+        // テキスト内のダブルクォーテーションをエスケープ
         const escapedText = text.replace(/"/g, '\\"');
 
         let js = `  const ${varName} = document.createElement('div');\n`;
@@ -108,6 +114,7 @@ function compileVortexToJS(vortexCode) {
             if (prop === 'Color') {
                 js += `  ${varName}.style.color = "${val}";\n`;
             } else if (prop === 'Font') {
+                // 値の中のダブルクォーテーションをエスケープしてJSの文字列に入れる
                 const escapedFont = val.replace(/"/g, '\\"');
                 js += `  ${varName}.style.fontFamily = "${escapedFont}";\n`;
             } else if (prop === 'Size') {
@@ -125,35 +132,27 @@ function compileVortexToJS(vortexCode) {
 }
 
 // ==========================================
-// ファイル選択（<input type="file">）との連携処理
+// 動作確認テスト（先ほどのサンプルコード）
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('vtxFile');
-    if (!fileInput) return;
+const sampleVortexCode = `
+.main. // mainの始まり
+BackgroundColor(#000000); // 背景色を黒に設定
 
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+Text(Vortex Official Site){ // 「Vortex Official Site」を表示
+  Color: #FFFFFF; // 文字色を白に指定
+  Font: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Sans Serif", "Yu Gothic"; // フォントを指定
+  Size: 30px; // サイズを30pxに指定
+  Bold: 1; // 太さを指定(0ならデフォルト、1なら太字になる)
+};
+^main // mainの終わり
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const vortexCode = e.target.result;
-            try {
-                console.log("--- 読み込んだ Vortex コード ---");
-                console.log(vortexCode);
+play(main); // mainを実行する
+`;
 
-                // コンパイル実行
-                const generatedJS = compileVortexToJS(vortexCode);
-                console.log("--- 変換された JavaScript ---");
-                console.log(generatedJS);
+// コンパイルして変換後のJSをコンソールに表示
+const generatedJS = compileVortexToJS(sampleVortexCode);
+console.log("--- 生成されたJavaScript ---");
+console.log(generatedJS);
 
-                // ブラウザ上で実行
-                new Function(generatedJS)();
-            } catch (err) {
-                alert("コンパイルエラー: " + err.message);
-                console.error(err);
-            }
-        };
-        reader.readAsText(file);
-    });
-});
+// ブラウザ上でそのまま実行したい場合は以下のコメントを外す
+new Function(generatedJS)();
